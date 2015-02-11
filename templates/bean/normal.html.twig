@@ -1,0 +1,8 @@
+{% set entity = build['#entity'] %}
+<div class="ads-block {{ entity.bid}}">
+  {% if entity.field_ads_block_link %}
+    <a href="{{ entity.field_ads_block_link['und'][0]['url'] }}"><img src="{{ fn__image_style_url(entity.field_ads_image_style['und'][0]['value'], entity.field_ads_block_image['und'][0]['uri']) }}"></a>
+  {% else %}
+    <img src="{{ fn__image_style_url(entity.field_ads_image_style['und'][0]['value'], entity.field_ads_block_image['und'][0]['uri']) }}">
+  {% endif %}
+</div>

@@ -1,0 +1,130 @@
+<?php
+/**
+ * @file
+ * Code for the SRW Ads Block feature.
+ */
+
+include_once 'srw_ads_block.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function srw_ads_block_menu() {
+  $items['admin/ads-block-management'] = array(
+    'title' => 'Ads management',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('srw_ads_block_management'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * implement admin form
+ *
+ * @return mixed
+ */
+function srw_ads_block_management() {
+  $form = array();
+  $form['srw_ads_block'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Expanded main menu as default (on mobile).'),
+    '#default_value' => variable_get('srw_thien_menu_collapsed_settings', 0),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function srw_ads_block_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'field_ui_field_edit_form') {
+    if ($form['#field']['module'] == 'list') {
+      srw_ads_block_add_options($form['field']['settings']);
+    }
+  } elseif ($form_id == 'field_ui_field_settings_form') {
+    if ($form['field']['module']['#value'] == 'list') {
+      srw_ads_block_add_options($form['field']['settings']);
+    }
+  }
+}
+
+function srw_ads_block_add_options(&$field_settings) {
+  $field_settings['allowed_values_function'] = array(
+    '#type' => 'select',
+    '#title' => t('Allowed values'),
+    '#options' => srw_ads_block_get_callback_options() + array('' => t('Custom')),
+    '#default_value' => $field_settings['allowed_values_function']['#value'],
+    '#weight' => -10,
+  );
+  $field_settings['allowed_values']['#states']['visible'][':input[name="field[settings][allowed_values_function]"]'] = array('value' => '');
+  $field_settings['allowed_values']['#access'] = TRUE;
+  $field_settings['allowed_values_function_display']['#access'] = FALSE;
+}
+
+/**
+ * Get all the predefined options via hook_list_option_info().
+ *
+ * @see hook_list_option_info()
+ * @see hook_list_option_info_alter()
+ */
+function srw_ads_block_get_list_option_info() {
+  $info = &drupal_static(__FUNCTION__);
+  if (!isset($options)) {
+    $cid = "list:predefined-option:info:" . $GLOBALS['language']->language;
+    if ($cache = cache_get($cid)) {
+      $info = $cache->data;
+    }
+    else {
+      $info = module_invoke_all('list_option_info');
+      drupal_alter('list_option_info', $info);
+      cache_set($cid, $info);
+    }
+  }
+  return $info;
+}
+
+/**
+ * Get an array of predefined options prepared for #options.
+ *
+ * The array will be formatted with the option callback as the keys, and the
+ * label as the values.
+ */
+function srw_ads_block_get_callback_options() {
+  $info = srw_ads_block_get_list_option_info();
+  $options = array();
+  foreach ($info as $option) {
+    $options[$option['callback']] = $option['label'];
+  }
+  return $options;
+}
+
+/**
+ * Implements hook_list_option_info().
+ */
+function srw_ads_block_list_option_info() {
+  $info['image_style'] = array(
+    'label' => t('Image Styles'),
+    'callback' => 'srw_ads_block_list_option_image_styles',
+  );
+  return $info;
+}
+
+
+/**
+ * List option callback for US states.
+ */
+function srw_ads_block_list_option_image_styles() {
+  $image_styles = image_styles();
+  $options = array();
+  if($image_styles) {
+    foreach ($image_styles as $key => $value) {
+      $options[$key] = $key;
+    }
+  }
+  return $options;
+}
+
