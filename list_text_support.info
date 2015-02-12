@@ -1,0 +1,9 @@
+name = List options support
+description = Add extends list on list text field
+core = 7.x
+package = Go1
+version = 7.x-1.0-alpha3
+project = list_text_support
+dependencies[] = list
+dependencies[] = options
+
