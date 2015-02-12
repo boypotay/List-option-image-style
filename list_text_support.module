@@ -77,6 +77,14 @@ function list_text_support_list_option_info() {
     'label' => t('Image Styles'),
     'callback' => 'list_text_support_list_option_image_styles',
   );
+  $info['content_type'] = array(
+    'label' => t('Content Types'),
+    'callback' => 'list_text_support_list_option_content_type',
+  );
+  $info['user_roles'] = array(
+    'label' => t('User Roles'),
+    'callback' => 'list_text_support_list_option_user_roles',
+  );
   return $info;
 }
 
@@ -90,6 +98,34 @@ function list_text_support_list_option_image_styles() {
   if($image_styles) {
     foreach ($image_styles as $key => $value) {
       $options[$key] = $key;
+    }
+  }
+  return $options;
+}
+
+/**
+ * List option callback for content types
+ */
+function list_text_support_list_option_content_type() {
+  $content_types = node_type_get_types();
+  $options = array();
+  if($content_types) {
+    foreach ($content_types as $key => $value) {
+      $options[$key] = $value->name;
+    }
+  }
+  return $options;
+}
+
+/**
+ * List option callback for user roles
+ */
+function list_text_support_list_option_user_roles() {
+  $user_roles = user_roles();
+  $options = array();
+  if($user_roles) {
+    foreach ($user_roles as $key => $value) {
+      $options[$value] = $value;
     }
   }
   return $options;
